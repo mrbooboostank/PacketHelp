@@ -20,6 +20,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.WrittenBookItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.IntArrayNBT;
+import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.stats.Stats;
@@ -50,21 +52,11 @@ public class TestItem extends WrittenBookItem {
 	
 	@Override
 	public void inventoryTick(ItemStack item, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
-		CompoundNBT nbt;
-		if (item.hasTag()) {
-			nbt = item.getTag();
-		} else {
-			nbt = new CompoundNBT();
-			// setting up pages, character limit for pages is 255 characters
-			ListNBT nbtList = new ListNBT();
-			nbtList.add((INBT) (StringNBT.func_229705_a_(
-				"{\"text\":\"" + new StringTextComponent("Lorem Ipsum").getString() + "\"}")));
-			// setup strings for author, title, and pages.
-			nbt.putString("title", "My house");
-			nbt.putString("author", "The construction company");
-			nbt.put("pages", nbtList);
+		if (worldIn.isRemote) {
+			PlayerEntity playerIn = ((PlayerEntity) entityIn);
+			playerIn.sendStatusMessage(new StringTextComponent(item.getTag().toString()), true);
+			//showPage(item, playerIn, null);
 		}
-		item.setTag(nbt);
 	}
 
 	// Overridden so the item's display name is the one set from the main java file
@@ -83,8 +75,8 @@ public class TestItem extends WrittenBookItem {
 		// only ran on the server so the client doesn't get confused
 		if (!worldIn.isRemote) {
 			Random rand = new Random();
-			int randChoice = rand.nextInt(6);
-			switch (randChoice) {
+			int rand_choice = rand.nextInt(6);
+			switch (rand_choice) {
 			case 0:
 					// server things here
 				break;
@@ -104,18 +96,29 @@ public class TestItem extends WrittenBookItem {
 				// server things here
 				break;
 			}
+			//playerIn.openBook(item, handIn);
 			
-			playerIn.openBook(item, handIn);
+			CompoundNBT nbt = item.getOrCreateTag();
 			
-			// right here randChoice, generated serverside, should be sent to the client via this packet handler
+			nbt.putInt("rand_choice", rand_choice);
 			
-			PacketHandlerTest.INSTANCE.send(PacketDistributor.PLAYER.with((Supplier<ServerPlayerEntity>) playerIn), new PacketTest(randChoice));
+			item.setTag(nbt);
+			
+			System.out.println("serverside rand_choice is");
+			//System.out.println(rand_choice);
+			
+			// right here rand_choice, generated serverside, should be sent to the client via this packet handler
+			
+			PacketHandlerTest.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) playerIn), new PacketTest(rand_choice));
 			
 			// include this to update the Stats
 			playerIn.addStat(Stats.ITEM_USED.get(this));
 		}
 		else {
-			showPage(item, playerIn, handIn);
+			System.out.println("CLIENTSIDE rand_choice is");
+			System.out.println(item.getTag());
+			playerIn.sendStatusMessage(new StringTextComponent(item.getTag().toString()), true);
+			//showPage(item, playerIn, handIn);
 		}
 
 		// minecraft day is 20 min, or 24000 ticks, or 1200 seconds.
@@ -127,8 +130,10 @@ public class TestItem extends WrittenBookItem {
 	private void showPage(ItemStack item, PlayerEntity playerIn, Hand handIn) {
 		String title = "asdf";
 		Minecraft.getInstance().displayGuiScreen(new TestScreen(playerIn, item, false, handIn, 1, title ));
-		// read randChoice packet and use it in a message
-		playerIn.sendStatusMessage(new StringTextComponent("randChoice should be here"), true);
+		// read rand_choice packet and use it in a message
+		//int temp_num = item.getTag().getInt("rand_choice");
+		//int temp_num = 1;
+		//playerIn.sendStatusMessage(new StringTextComponent(Integer.toString(temp_num)), true);
 	}
 	
 	@Override

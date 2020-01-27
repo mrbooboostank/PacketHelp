@@ -7,6 +7,7 @@ import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 public class PacketHandlerTest {
+	
 	private static final String PROTOCOL_VERSION = "1";
 	public static SimpleChannel INSTANCE; 
 	
