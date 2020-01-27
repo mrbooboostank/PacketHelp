@@ -49,15 +49,6 @@ public class TestItem extends WrittenBookItem {
 	public boolean hasEffect(ItemStack stack) {
 		return false;
 	}
-	
-	@Override
-	public void inventoryTick(ItemStack item, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
-		if (worldIn.isRemote) {
-			PlayerEntity playerIn = ((PlayerEntity) entityIn);
-			playerIn.sendStatusMessage(new StringTextComponent(item.getTag().toString()), true);
-			//showPage(item, playerIn, null);
-		}
-	}
 
 	// Overridden so the item's display name is the one set from the main java file
 	// instead of the nbt title
@@ -96,16 +87,9 @@ public class TestItem extends WrittenBookItem {
 				// server things here
 				break;
 			}
-			//playerIn.openBook(item, handIn);
-			
-			CompoundNBT nbt = item.getOrCreateTag();
-			
-			nbt.putInt("rand_choice", rand_choice);
-			
-			item.setTag(nbt);
 			
 			System.out.println("serverside rand_choice is");
-			//System.out.println(rand_choice);
+			System.out.println(rand_choice);
 			
 			// right here rand_choice, generated serverside, should be sent to the client via this packet handler
 			
@@ -115,9 +99,9 @@ public class TestItem extends WrittenBookItem {
 			playerIn.addStat(Stats.ITEM_USED.get(this));
 		}
 		else {
-			System.out.println("CLIENTSIDE rand_choice is");
-			System.out.println(item.getTag());
-			playerIn.sendStatusMessage(new StringTextComponent(item.getTag().toString()), true);
+			//System.out.println("CLIENTSIDE rand_choice is");
+			//System.out.println(item.getTag());
+			//playerIn.sendStatusMessage(new StringTextComponent(item.getTag().toString()), true);
 			//showPage(item, playerIn, handIn);
 		}
 
@@ -129,7 +113,7 @@ public class TestItem extends WrittenBookItem {
 	@OnlyIn(Dist.CLIENT)
 	private void showPage(ItemStack item, PlayerEntity playerIn, Hand handIn) {
 		String title = "asdf";
-		Minecraft.getInstance().displayGuiScreen(new TestScreen(playerIn, item, false, handIn, 1, title ));
+		Minecraft.getInstance().displayGuiScreen(new TestScreen(playerIn, false, 1, title ));
 		// read rand_choice packet and use it in a message
 		//int temp_num = item.getTag().getInt("rand_choice");
 		//int temp_num = 1;

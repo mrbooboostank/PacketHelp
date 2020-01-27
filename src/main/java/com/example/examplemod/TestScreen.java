@@ -20,15 +20,13 @@ public class TestScreen extends ReadBookScreen {
 	private int currPage;
 	private ListNBT bookPages;
 	private List<ITextComponent> cachedComponents;
-	private ItemStack item;
 	private String title;
 
 	// constructor
-	public TestScreen(PlayerEntity playerIn, ItemStack item, boolean bookSign, Hand handIn, int currPage,
+	public TestScreen(PlayerEntity playerIn, boolean bookSign, int currPage,
 			String title) {
 		// super(playerIn, item, bookSign, handIn);
 		this.currPage = currPage;
-		this.item = item;
 		this.title = title;
 	}
 
